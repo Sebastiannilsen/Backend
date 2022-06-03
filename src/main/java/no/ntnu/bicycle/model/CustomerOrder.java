@@ -82,6 +82,9 @@ public class CustomerOrder {
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public Customer getCustomer() {
         return customer;
