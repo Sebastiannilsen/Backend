@@ -1,9 +1,7 @@
 package no.ntnu.bicycle.controller;
 
-import no.ntnu.bicycle.mail.EmailSenderService;
 import no.ntnu.bicycle.model.BillingAndShippingAddress;
 import no.ntnu.bicycle.model.Customer;
-import no.ntnu.bicycle.model.Email;
 import no.ntnu.bicycle.service.CustomerService;
 import no.ntnu.bicycle.service.ProductService;
 import org.springframework.http.HttpStatus;
@@ -25,22 +23,18 @@ import java.util.NoSuchElementException;
  * REST API controller for customer.
  */
 @RestController
-@RequestMapping("/customers")
+@RequestMapping("/api/customers")
 public class CustomerController {
+
     private final CustomerService customerService;
-
-    private final EmailSenderService emailSenderService;
-
     private final ProductService productService;
 
     /**
      * Constructor with parameters
      * @param customerService customer service
-     * @param emailSenderService email sender service
      */
-    public CustomerController(CustomerService customerService, EmailSenderService emailSenderService, ProductService productService) {
+    public CustomerController(CustomerService customerService, ProductService productService) {
         this.customerService = customerService;
-        this.emailSenderService = emailSenderService;
         this.productService = productService;
     }
 
@@ -156,22 +150,9 @@ public class CustomerController {
     public ResponseEntity<String> registerNewCustomer(@RequestBody Customer customer)  {
         ResponseEntity<String> response;
         if (customerService.addNewCustomer(customer)) {
-            response = new ResponseEntity<>(HttpStatus.OK);
-            try {
-                Email email = new Email();
-                email.setTo(customer.getEmail());
-                email.setSubject("Welcome Email from Keep rolling, rolling, rolling");
-                email.setTemplate("welcome-email.html");
-                Map<String, Object> properties = new HashMap<>();
-                properties.put("name", customer.getFirstName());
-                email.setProperties(properties);
-
-                emailSenderService.sendHtmlMessage(email);
-            }catch (MessagingException e){
-                System.err.println("Welcome mail could not be sent");
-            }
+            response = new ResponseEntity<>("OK",HttpStatus.OK);
         } else {
-            response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            response = new ResponseEntity<>("Could not create customer",HttpStatus.BAD_REQUEST);
         }
         return response;
     }
@@ -192,13 +173,7 @@ public class CustomerController {
         if (customer != null) {
             String generatedPassword = customerService.resetPassword(email);
             if (generatedPassword != null){
-                try{
-                    emailSenderService.sendEmail(email, "Password reset", "Your new password is: " + generatedPassword);
-                    response = new ResponseEntity<>(HttpStatus.OK);
-                }catch (MailException e){
-                    e.printStackTrace();
-                    response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
+                response = new ResponseEntity<>(generatedPassword,HttpStatus.OK);
             }
         } else {
             response = new ResponseEntity<>(HttpStatus.NOT_FOUND);

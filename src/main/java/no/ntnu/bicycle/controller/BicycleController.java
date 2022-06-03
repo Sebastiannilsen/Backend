@@ -1,7 +1,6 @@
 package no.ntnu.bicycle.controller;
 
 import no.ntnu.bicycle.model.Bicycle;
-import no.ntnu.bicycle.service.BicycleRentalOrderService;
 import no.ntnu.bicycle.service.BicycleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +16,6 @@ import java.util.List;
 public class BicycleController {
 
     private BicycleService bicycleService;
-    private BicycleRentalOrderService bicycleRentalOrderService;
 
     /**
      * Constructor with bicycle service

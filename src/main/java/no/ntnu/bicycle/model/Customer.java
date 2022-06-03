@@ -36,18 +36,8 @@ public class Customer {
 
     @ManyToMany
     @JoinTable(name="shoppingCart", joinColumns = @JoinColumn(name="customerId"), inverseJoinColumns = @JoinColumn(name="productId"))
-    //@OneToMany(targetEntity = Product.class, cascade = CascadeType.MERGE)
-    //@JoinColumn(name = "product_id", referencedColumnName = "id")
     private List<Product> shoppingCart;
 
-    //@ManyToMany
-    //@JoinTable(name="skriv nokka her", joinColumns = @JoinColumn(name="customerId"), inverseJoinColumns = @JoinColumn(name="productId"))
-    //private List<Product> products;
-
-
-    //@OneToMany
-    //@JsonIgnore
-    //private Set<CustomerOrder> orders = new HashSet<>();
 
     /**
      * Instantiates a new Customer.
