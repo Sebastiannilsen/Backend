@@ -7,6 +7,7 @@ import no.ntnu.bicycle.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -43,7 +44,7 @@ public class CustomerController {
      * HTTP get
      * @return list of all customers
      */
-    @GetMapping
+    @GetMapping("/all")
     public List<Customer> getCustomer() {
         return customerService.getAllCustomers();
     }
@@ -70,7 +71,7 @@ public class CustomerController {
      * @return Customer by email, 404 not found or 403 forbidden.
      */
     @GetMapping("/authenticated-customer")
-    public ResponseEntity<Customer> getOneCustomerByEmail(){
+    public ResponseEntity<Customer> getLoggedInCustomer(){
         ResponseEntity<Customer> response;
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -177,7 +178,6 @@ public class CustomerController {
             }
         } else {
             response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            System.out.println("Customer doesnt exist");
         }
         }catch (NoSuchElementException e){
             response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
