@@ -44,7 +44,7 @@ public class CustomerController {
      * HTTP get
      * @return list of all customers
      */
-    @GetMapping("/all")
+    @GetMapping
     public List<Customer> getCustomer() {
         return customerService.getAllCustomers();
     }
@@ -73,20 +73,17 @@ public class CustomerController {
     @GetMapping("/authenticated-customer")
     public ResponseEntity<Customer> getLoggedInCustomer(){
         ResponseEntity<Customer> response;
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String customerEmail = auth.getName();
-            Customer customer = customerService.findCustomerByEmail(customerEmail);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String customerEmail = auth.getName();
+        Customer customer = customerService.findCustomerByEmail(customerEmail);
 
-            if (customer != null) {
-                response = new ResponseEntity<>(customer, HttpStatus.OK);
-            } else {
-                response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        }catch (NoSuchElementException e){
-            response = new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        if (customer != null) {
+            response = new ResponseEntity<>(customer, HttpStatus.OK);
+        } else if (customer == null){
+            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         return response;
     }
 
@@ -97,20 +94,15 @@ public class CustomerController {
     @GetMapping("/authenticated-address")
     public ResponseEntity<BillingAndShippingAddress> getAddressOfCustomerByEmail(){
         ResponseEntity<BillingAndShippingAddress> response;
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String customerEmail = auth.getName();
-            Customer customer = customerService.findCustomerByEmail(customerEmail);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String customerEmail = auth.getName();
+        Customer customer = customerService.findCustomerByEmail(customerEmail);
 
-            if (customer != null) {
-                response = new ResponseEntity<>(customer.getAddress(), HttpStatus.OK);
-            } else {
-                response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        }catch (NoSuchElementException e){
-            response = new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        if (customer != null) {
+            response = new ResponseEntity<>(customer.getAddress(), HttpStatus.OK);
+        } else {
+            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
         return response;
     }
 
@@ -122,22 +114,16 @@ public class CustomerController {
     @PostMapping("/authenticated-address")
     public ResponseEntity<String> updateAddressOfCustomer(@RequestBody BillingAndShippingAddress address) {
         ResponseEntity<String> response;
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String customerEmail = auth.getName();
-            Customer customer = customerService.findCustomerByEmail(customerEmail);
-
-            if (customer != null) {
-                customer.setAddress(address);
-                customerService.updateCustomer(customer.getId(), customer);
-                response = new ResponseEntity<>(HttpStatus.OK);
-            } else {
-                response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        }catch (NoSuchElementException e){
-            response = new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String customerEmail = auth.getName();
+        Customer customer = customerService.findCustomerByEmail(customerEmail);
+        if (customer != null) {
+            customer.setAddress(address);
+            customerService.updateCustomer(customer.getId(), customer);
+            response = new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
         return response;
     }
 
@@ -169,7 +155,6 @@ public class CustomerController {
         String[] stringArray = emailObject.split("\"" );
         String email = stringArray[3];
         ResponseEntity<String> response = null;
-        try {
             Customer customer = customerService.findCustomerByEmail(email);
         if (customer != null) {
             String generatedPassword = customerService.resetPassword(email);
@@ -177,9 +162,6 @@ public class CustomerController {
                 response = new ResponseEntity<>(generatedPassword,HttpStatus.OK);
             }
         } else {
-            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        }catch (NoSuchElementException e){
             response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return response;
@@ -260,18 +242,15 @@ public class CustomerController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
 
-        try{
-            Customer customer = customerService.findCustomerByEmail(email);
+        Customer customer = customerService.findCustomerByEmail(email);
 
+        if (customer != null && customer.isValid()) {
             customer.removeFromShoppingCart(productService.findOrderById(id));
-
             customerService.updateCustomer(customer.getId(), customer);
-
             response = new ResponseEntity<>(HttpStatus.OK);
-        }catch (NoSuchElementException e){
+        } else {
             response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
         return response;
     }
 }
