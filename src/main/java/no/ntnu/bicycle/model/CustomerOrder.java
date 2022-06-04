@@ -26,18 +26,17 @@ public class CustomerOrder {
 
 
     @OneToMany(cascade = CascadeType.MERGE, fetch= FetchType.EAGER)
-    @JoinColumn(name = "product_id",referencedColumnName="id")
+    @Column(name = "products")
     private List<Product> products;
 
 
     /**
      * Constructor with parameters.
      * @param customer the customer ordering
-     * @param products the list of products
      */
-    public CustomerOrder(Customer customer,List<Product> products) {
+    public CustomerOrder(Customer customer) {
         this.customer = customer;
-        this.products = products;
+        this.products = customer.getShoppingCart();
         this.dateAndTime = LocalDateTime.now();
         this.email = customer.getEmail();
     }

@@ -77,8 +77,15 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationRead
         productRepository.saveAll(List.of(blueHelmet,whiteHelmet,blueHelmet1,whiteHelmet1,blueHelmet2,whiteHelmet2));
 
 
-        CustomerOrder order1 = new CustomerOrder(sebastian,List.of(blueHelmet,whiteHelmet));
-        CustomerOrder order2 = new CustomerOrder(anne,List.of(blueHelmet1));
+        sebastian.addProductToShoppingCart(blueHelmet);
+        sebastian.addProductToShoppingCart(whiteHelmet);
+
+        anne.addProductToShoppingCart(blueHelmet2);
+
+        customerRepository.saveAll(List.of(sebastian,anne));
+
+        CustomerOrder order1 = new CustomerOrder(sebastian);
+        CustomerOrder order2 = new CustomerOrder(anne);
 
         orderRepository.saveAll(List.of(order1,order2));
 
