@@ -20,8 +20,8 @@ import java.util.Properties;
 @RequestMapping("/api/products")
 public class ProductController {
 
-    private ProductService productService;
-    private CustomerService customerService;
+    private final ProductService productService;
+    private final CustomerService customerService;
 
     /**
      * Constructor with parameters
@@ -99,30 +99,21 @@ public class ProductController {
      */
     @PostMapping(value = "/addToCart", consumes = "application/json")
     public ResponseEntity<String> addProductToCart(@RequestBody String idJsonObject){
-        try {
-            String[] stringArray = idJsonObject.split("\"" );
-            int id = Integer.parseInt(stringArray[3]);
-
-            Product product = productService.findOrderById(id);
-
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String email = auth.getName();
-            if (email.equals("anonymousUser")){
-                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-            }else{
-
-                Customer customer = customerService.findCustomerByEmail(email);
-
-                customer.addProductToShoppingCart(product);
-
-                customerService.updateCustomer(customer.getId(), customer);
-
-                return new ResponseEntity<>(HttpStatus.OK);
-            }
-        }catch (Exception e){
-            e.printStackTrace();
+            if (idJsonObject != null) {
+                String[] stringArray = idJsonObject.split("\"" );
+                int id = Integer.parseInt(stringArray[3]);
+                Product product = productService.findOrderById(id);
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                String email = auth.getName();
+                if (email.equals("anonymousUser")){
+                    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                }else{
+                    Customer customer = customerService.findCustomerByEmail(email);
+                    customer.addProductToShoppingCart(product);
+                    customerService.updateCustomer(customer.getId(), customer);
+                    return new ResponseEntity<>(HttpStatus.OK);
+            }}
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
     }
 
     /**
@@ -131,13 +122,13 @@ public class ProductController {
      */
     @GetMapping(value = "/shopping-cart", produces = "application/json")
     public ResponseEntity<List<Product>> getProductsInCart(){
-        try{
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String email = auth.getName();
-            Customer customer = customerService.findCustomerByEmail(email);
-            List<Product> products = customer.getShoppingCart();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        Customer customer = customerService.findCustomerByEmail(email);
+        List<Product> products = customer.getShoppingCart();
+        if (!products.isEmpty()) {
             return new ResponseEntity<>(products,HttpStatus.OK);
-        }catch(Exception e){
+        } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
