@@ -33,18 +33,17 @@ public class BicycleService {
      */
     public Bicycle findBicycleById(long id) {
         Optional<Bicycle> bicycle = bicycleRepository.findById(id);
-
-        return bicycle.get();
+        return bicycle.orElse(null);
     }
 
-    public void setStatusToAvailable(long id){
-        try {
-            Bicycle bicycle = findBicycleById(id);
+    public boolean setStatusToAvailable(long id){
+        Bicycle bicycle = findBicycleById(id);
+        if (bicycle != null && bicycle.isValid()){
             bicycle.setStatusToAvailable();
-
             bicycleRepository.save(bicycle);
-        } catch (NoSuchElementException e) {
-
+            return true;
+        }else{
+            return false;
         }
     }
 
@@ -55,22 +54,11 @@ public class BicycleService {
      */
     public boolean addBicycle(Bicycle bicycle) {
         boolean added = false;
-        if (bicycle != null) {
-            try {
-                findBicycleById(bicycle.getId());
-            } catch (NoSuchElementException e ) {
-                bicycleRepository.save(bicycle);
-                added = true;
-            }
+        if ((bicycle.isValid()) && (findBicycleById(bicycle.getId()) == null)) {
+            bicycleRepository.save(bicycle);
+            added = true;
         }
         return added;
-       /* try {
-            findBicycleById(bicycle.getId());
-            bicycleRepository.save(bicycle);
-            return true;
-        } catch (NoSuchElementException e) {
-            return false;
-        }*/
     }
 
     /**
@@ -88,7 +76,7 @@ public class BicycleService {
     public List<Bicycle> getAllAvailableBicycles() {
         ArrayList<Bicycle> list = new ArrayList<>();
         bicycleRepository.findAll().forEach(bicycle -> {
-            if (bicycle.isAvailable()) {
+            if (bicycle.isAvailable() && bicycle.isValid()) {
                 list.add(bicycle);
             }
         });
@@ -110,8 +98,15 @@ public class BicycleService {
         }
     }
 
-    public void updateBicycle(Bicycle bicycle) {
-        bicycleRepository.save(bicycle);
+    public boolean updateBicycle(Bicycle bicycle) {
+        boolean updated;
+        if (bicycle.isValid() && findBicycleById(bicycle.getId()) != null){
+            bicycleRepository.save(bicycle);
+            updated = true;
+        }else{
+            updated = false;
+        }
+        return updated;
 
     }
 

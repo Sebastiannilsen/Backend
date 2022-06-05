@@ -129,7 +129,7 @@ public class CustomerController {
         String errorMessage = customerService.addNewCustomer(customer);
         if (errorMessage == null) {
             response = new ResponseEntity<>("Customer " + customer.getFirstName() +
-                    " " + customer.getLastName() + " added", HttpStatus.OK);
+                    " " + customer.getLastName() + " added", HttpStatus.CREATED);
         } else {
             response = new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
         }

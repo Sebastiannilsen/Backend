@@ -144,6 +144,7 @@ public class Product {
         this.price = price;
     }
 
+    @JsonIgnore
     public boolean isValid() {
         return (this.productName != null && this.color != null && this.imageUrl != null && this.description != null && this.price != 0);
     }

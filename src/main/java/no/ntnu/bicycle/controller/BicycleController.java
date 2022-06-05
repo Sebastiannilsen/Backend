@@ -1,11 +1,14 @@
 package no.ntnu.bicycle.controller;
 
 import no.ntnu.bicycle.model.Bicycle;
+import no.ntnu.bicycle.model.Customer;
 import no.ntnu.bicycle.service.BicycleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.websocket.server.PathParam;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -36,6 +39,21 @@ public class BicycleController {
         response = new ResponseEntity<>(bicycleService.getAllBicycles(), HttpStatus.OK) ;
 
         return response;
+    }
+
+    /**
+     * Gets one specific bike
+     * @param bikeId ID of the bike to be returned
+     * @return Bike with the given ID or status 404
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<Bicycle> getOneCustomer(@PathParam("bike") @PathVariable("id") int bikeId) {
+        Bicycle bicycle = bicycleService.findBicycleById(bikeId);
+        if (bicycle != null) {
+            return new ResponseEntity<>(bicycle,HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     /**
@@ -77,13 +95,18 @@ public class BicycleController {
     @PutMapping
     public ResponseEntity<String> updateBicycle(@RequestBody Bicycle bicycle) {
         ResponseEntity<String> response;
-        try{
-            bicycleService.findBicycleById(bicycle.getId());
-            bicycleService.updateBicycle(bicycle);
-            response = new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e){
-            response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            e.printStackTrace();
+        if (bicycle.isValid()) {
+            if (bicycleService.findBicycleById(bicycle.getId()) != null) {
+                if (bicycleService.updateBicycle(bicycle)) {
+                    response = new ResponseEntity<>("Bike was updated", HttpStatus.OK);
+                } else {
+                    response = new ResponseEntity<>("Could not update bike", HttpStatus.BAD_REQUEST);
+                }
+            } else {
+                response = new ResponseEntity<>("Bike does not exist", HttpStatus.BAD_REQUEST);
+            }
+        }else{
+            response = new ResponseEntity<>("One or more of the fields are invalid", HttpStatus.BAD_REQUEST);
         }
         return response;
     }
@@ -96,10 +119,14 @@ public class BicycleController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteBicycle(@PathVariable("id") int bikeId) {
         ResponseEntity<String> response;
-        if(bicycleService.deleteBicycle(bikeId)){
-            response = new ResponseEntity<>(HttpStatus.OK);
+        if (bicycleService.findBicycleById(bikeId) != null) {
+            if (bicycleService.deleteBicycle(bikeId)) {
+                response = new ResponseEntity<>(HttpStatus.OK);
+            }else{
+                response = new ResponseEntity<>("Could not delete the bike",HttpStatus.BAD_REQUEST);
+            }
         }else{
-            response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            response = new ResponseEntity<>("Could not find bike with that id",HttpStatus.BAD_REQUEST);
         }
         return response;
     }

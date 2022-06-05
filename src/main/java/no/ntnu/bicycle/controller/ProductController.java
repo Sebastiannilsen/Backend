@@ -75,10 +75,10 @@ public class ProductController {
         ResponseEntity<String> response;
 
         Product existingProduct = productService.getProductById(product.getId());
-        if (product.isValid()) {
+        if (product.isValid()){
             if (existingProduct == null) {
                 if (productService.addNewProduct(product)) {
-                    response = new ResponseEntity<>(HttpStatus.OK);
+                    response = new ResponseEntity<>("Product successfully added",HttpStatus.CREATED);
                 } else {
                     response = new ResponseEntity<>("Product could not be added", HttpStatus.BAD_REQUEST);
                 }
@@ -86,7 +86,7 @@ public class ProductController {
                 response = new ResponseEntity<>("Product already exist", HttpStatus.BAD_REQUEST);
             }
         }else{
-            response = new ResponseEntity<>("Empty body in request", HttpStatus.BAD_REQUEST);
+            response = new ResponseEntity<>("Invalid fields for bike in request", HttpStatus.BAD_REQUEST);
         }
         return response;
     }
