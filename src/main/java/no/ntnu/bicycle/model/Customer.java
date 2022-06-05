@@ -110,17 +110,23 @@ public class Customer {
      */
     @JsonIgnore
     public boolean isValid() {
-        String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
-        Pattern pattern = Pattern.compile(regex);
+        return !"".equals(firstName) && !"".equals(lastName);
+    }
 
-        boolean nameFirst = "".equals(firstName);
-        boolean nameLast = "".equals(lastName);
-        boolean email1 = "".equals(email);
-        Matcher emailFormat = pattern.matcher(email);
-        boolean password1 = "".equals(password);
+    @JsonIgnore
+    public boolean isEmailValid() {
+        Pattern pattern =
+                Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.find() && !"".equals(email);
+    }
 
-        return !nameFirst && !nameLast && !email1 && !password1 && dob != null && age > 0
-                && emailFormat.equals(false);
+    @JsonIgnore
+    public boolean isPasswordValid() {
+        Pattern pattern =
+                Pattern.compile("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\\\S+$).{8,}");
+        Matcher matcher = pattern.matcher(password);
+        return matcher.find() && !"".equals(password);
     }
 
     /**

@@ -67,9 +67,18 @@ public class CustomerService {
      * @param customer Customer. customer to be added.
      * @return true if the customer got added, false if it did not get added
      */
-    public boolean addNewCustomer(Customer customer) {
-        boolean added = false;
-        if (customer != null && customer.isValid()) {
+    public String addNewCustomer(Customer customer){
+        String errorMessage = null;
+        if (customer != null && !customer.isValid()) {
+            errorMessage = "Customer not added. Invalid name.";
+        }
+        else if (customer != null && !customer.isEmailValid()) {
+            errorMessage = "Customer not added. Invalid email";
+        }
+        else if (customer != null && customer.isPasswordValid()) {
+            errorMessage = "Customer not added. Invalid password";
+        }
+        if (errorMessage == null) {
             try {
                 findCustomerById(customer.getId());
             }catch (NoSuchElementException e) {
@@ -77,10 +86,9 @@ public class CustomerService {
                 customer.updateAge();
                 customer.setRole(Role.ROLE_USER);
                 customerRepository.save(customer);
-                added = true;
             }
         }
-        return added;
+        return errorMessage;
     }
 
     /**

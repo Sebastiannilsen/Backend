@@ -125,10 +125,11 @@ public class CustomerController {
     @PostMapping(consumes = "application/json")
     public ResponseEntity<String> registerNewCustomer(@RequestBody Customer customer)  {
         ResponseEntity<String> response;
-        if (customerService.addNewCustomer(customer) && customer.isValid()) {
+        String errorMessage = customerService.addNewCustomer(customer);
+        if (errorMessage == null) {
             response = new ResponseEntity<>("OK",HttpStatus.OK);
         } else {
-            response = new ResponseEntity<>("Could not create customer",HttpStatus.BAD_REQUEST);
+            response = new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
         }
         return response;
     }
