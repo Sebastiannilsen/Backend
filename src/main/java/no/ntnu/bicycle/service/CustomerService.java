@@ -69,7 +69,10 @@ public class CustomerService {
      */
     public String addNewCustomer(Customer customer){
         String errorMessage = null;
-        if (customer != null && !customer.isValid()) {
+        if (customerRepository.findByEmail(customer.getEmail()).isPresent()) {
+            errorMessage = "Customer already exists";
+        }
+        else if (customer != null && !customer.isValid()) {
             errorMessage = "Customer not added. Invalid name.";
         }
         else if (customer != null && !customer.isEmailValid()) {
@@ -117,12 +120,18 @@ public class CustomerService {
      * @param customerId int. Customer Id that gets deleted
      */
     public String deleteCustomer(int customerId) {
+        String errorMessage = null;
         Optional<Customer> customer = customerRepository.findById((long) customerId);
-        if (customer.isPresent()) {
-            customerRepository.delete(customer.get());
-            return "customer deleted successfully";
+        customerRepository.delete(customer.get());
+        if (customer.isEmpty()) {
+            errorMessage = "customer does not exist in DB";
+        } else if (customerId == 0) {
+            errorMessage = "customer id does not exist";
         }
-        return "customer does not exist in DB";
+        if (errorMessage == null) {
+            customerRepository.delete(customer.get());
+        }
+        return errorMessage;
     }
 
     /**
