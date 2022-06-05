@@ -47,7 +47,6 @@ public class CustomerOrder {
     public CustomerOrder() {
     }
 
-
     /**
      * Gets local date and time
      * @return date and time
@@ -69,8 +68,6 @@ public class CustomerOrder {
      * @return product
      */
      public List<Product> getProducts() {return products;}
-
-
 
     /**
      * Gets id
@@ -103,5 +100,13 @@ public class CustomerOrder {
 
     public void setProducts(List<Product> products) {
         this.products = products;
+    }
+
+    /**
+     * Checks if order is valid
+     * @return true if order is valid, false else
+     */
+    public boolean isValid() {
+        return customer.isValid() && !products.isEmpty() && dateAndTime == null && "".equals(email);
     }
 }

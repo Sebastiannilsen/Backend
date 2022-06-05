@@ -4,21 +4,16 @@ import no.ntnu.bicycle.model.BillingAndShippingAddress;
 import no.ntnu.bicycle.model.Customer;
 import no.ntnu.bicycle.service.CustomerService;
 import no.ntnu.bicycle.service.ProductService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailException;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.mail.MessagingException;
 import javax.websocket.server.PathParam;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
 
 /**
  * REST API controller for customer.
@@ -44,7 +39,7 @@ public class CustomerController {
      * HTTP get
      * @return list of all customers
      */
-    @GetMapping("/all")
+    @GetMapping
     public List<Customer> getCustomer() {
         return customerService.getAllCustomers();
     }
@@ -55,15 +50,9 @@ public class CustomerController {
      * @return Customer with the given ID or status 404
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getOneCustomer(@PathParam("costumer") @PathVariable("id") int customerId){
-        ResponseEntity<Customer> response;
-        Customer customer = customerService.findCustomerById(customerId);
-        if (customer != null) {
-            response = new ResponseEntity<>(customer, HttpStatus.OK);
-        } else {
-            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return response;
+    public Customer getOneCustomer(@PathParam("costumer")
+                                   @PathVariable("id") int customerId) {
+        return customerService.findCustomerById(customerId);
     }
 
     /**
@@ -73,20 +62,17 @@ public class CustomerController {
     @GetMapping("/authenticated-customer")
     public ResponseEntity<Customer> getLoggedInCustomer(){
         ResponseEntity<Customer> response;
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String customerEmail = auth.getName();
-            Customer customer = customerService.findCustomerByEmail(customerEmail);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String customerEmail = auth.getName();
+        Customer customer = customerService.findCustomerByEmail(customerEmail);
 
-            if (customer != null) {
-                response = new ResponseEntity<>(customer, HttpStatus.OK);
-            } else {
-                response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        }catch (NoSuchElementException e){
-            response = new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        if (customer != null) {
+            response = new ResponseEntity<>(customer, HttpStatus.OK);
+        } else if (customer == null){
+            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         return response;
     }
 
@@ -97,20 +83,15 @@ public class CustomerController {
     @GetMapping("/authenticated-address")
     public ResponseEntity<BillingAndShippingAddress> getAddressOfCustomerByEmail(){
         ResponseEntity<BillingAndShippingAddress> response;
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String customerEmail = auth.getName();
-            Customer customer = customerService.findCustomerByEmail(customerEmail);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String customerEmail = auth.getName();
+        Customer customer = customerService.findCustomerByEmail(customerEmail);
 
-            if (customer != null) {
-                response = new ResponseEntity<>(customer.getAddress(), HttpStatus.OK);
-            } else {
-                response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        }catch (NoSuchElementException e){
-            response = new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        if (customer != null) {
+            response = new ResponseEntity<>(customer.getAddress(), HttpStatus.OK);
+        } else {
+            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
         return response;
     }
 
@@ -122,22 +103,16 @@ public class CustomerController {
     @PostMapping("/authenticated-address")
     public ResponseEntity<String> updateAddressOfCustomer(@RequestBody BillingAndShippingAddress address) {
         ResponseEntity<String> response;
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String customerEmail = auth.getName();
-            Customer customer = customerService.findCustomerByEmail(customerEmail);
-
-            if (customer != null) {
-                customer.setAddress(address);
-                customerService.updateCustomer(customer.getId(), customer);
-                response = new ResponseEntity<>(HttpStatus.OK);
-            } else {
-                response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        }catch (NoSuchElementException e){
-            response = new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String customerEmail = auth.getName();
+        Customer customer = customerService.findCustomerByEmail(customerEmail);
+        if (customer != null) {
+            customer.setAddress(address);
+            customerService.updateCustomer(customer.getId(), customer);
+            response = new ResponseEntity<>("Address updated", HttpStatus.OK);
+        } else {
+            response = new ResponseEntity<>("Address could not be found", HttpStatus.NOT_FOUND);
         }
-
         return response;
     }
 
@@ -150,7 +125,7 @@ public class CustomerController {
     @PostMapping(consumes = "application/json")
     public ResponseEntity<String> registerNewCustomer(@RequestBody Customer customer)  {
         ResponseEntity<String> response;
-        if (customerService.addNewCustomer(customer)) {
+        if (customerService.addNewCustomer(customer) && customer.isValid()) {
             response = new ResponseEntity<>("OK",HttpStatus.OK);
         } else {
             response = new ResponseEntity<>("Could not create customer",HttpStatus.BAD_REQUEST);
@@ -169,7 +144,6 @@ public class CustomerController {
         String[] stringArray = emailObject.split("\"" );
         String email = stringArray[3];
         ResponseEntity<String> response = null;
-        try {
             Customer customer = customerService.findCustomerByEmail(email);
         if (customer != null) {
             String generatedPassword = customerService.resetPassword(email);
@@ -177,9 +151,6 @@ public class CustomerController {
                 response = new ResponseEntity<>(generatedPassword,HttpStatus.OK);
             }
         } else {
-            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        }catch (NoSuchElementException e){
             response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return response;
@@ -260,18 +231,15 @@ public class CustomerController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
 
-        try{
-            Customer customer = customerService.findCustomerByEmail(email);
+        Customer customer = customerService.findCustomerByEmail(email);
 
+        if (customer != null && customer.isValid()) {
             customer.removeFromShoppingCart(productService.findOrderById(id));
-
             customerService.updateCustomer(customer.getId(), customer);
-
             response = new ResponseEntity<>(HttpStatus.OK);
-        }catch (NoSuchElementException e){
+        } else {
             response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
         return response;
     }
 }
