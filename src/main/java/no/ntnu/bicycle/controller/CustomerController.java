@@ -1,5 +1,6 @@
 package no.ntnu.bicycle.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import no.ntnu.bicycle.model.BillingAndShippingAddress;
 import no.ntnu.bicycle.model.Customer;
 import no.ntnu.bicycle.service.CustomerService;
@@ -123,11 +124,12 @@ public class CustomerController {
      * or 400 bad request and prints out that mail could not be sent
      */
     @PostMapping(consumes = "application/json")
-    public ResponseEntity<String> registerNewCustomer(@RequestBody Customer customer)  {
+    public ResponseEntity<String> registerNewCustomer(@RequestBody Customer customer) throws JsonProcessingException {
         ResponseEntity<String> response;
         String errorMessage = customerService.addNewCustomer(customer);
         if (errorMessage == null) {
-            response = new ResponseEntity<>("OK",HttpStatus.OK);
+            response = new ResponseEntity<>("Customer " + customer.getFirstName() +
+                    " " + customer.getLastName() + " added", HttpStatus.OK);
         } else {
             response = new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
         }
