@@ -1,5 +1,7 @@
 package no.ntnu.bicycle.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -109,6 +111,7 @@ public class Bicycle {
      * Checking if bicycle is available
      * @return "AVAILABLE" if the bicycle is available
      */
+    @JsonIgnore
     public boolean isAvailable() {
         return Objects.equals(this.status, "AVAILABLE");
     }
@@ -154,6 +157,7 @@ public class Bicycle {
         this.status = "NEW";
     }
 
+    @JsonIgnore
     public boolean isValid() {
         if (this.color != null  && this.location != null) {
             return !this.color.isBlank()  && !this.location.isBlank() && this.pricePerMinute > 0;

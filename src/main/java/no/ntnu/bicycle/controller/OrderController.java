@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
  * REST API controller for orders.
  */
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/api/orders")
 public class OrderController {
     private OrderService orderService;
 

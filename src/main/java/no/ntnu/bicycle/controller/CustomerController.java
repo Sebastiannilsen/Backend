@@ -40,7 +40,7 @@ public class CustomerController {
      * @return list of all customers
      */
     @GetMapping
-    public List<Customer> getCustomer() {
+    public List<Customer> getAllCustomers() {
         return customerService.getAllCustomers();
     }
 
