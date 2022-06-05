@@ -182,10 +182,10 @@ public class CustomerController {
                 customerService.updateCustomer(customer.getId(),customer);
                  response = new ResponseEntity<>(HttpStatus.OK);
             }else{
-                 response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                 response = new ResponseEntity<>("Old password doesent match",HttpStatus.UNAUTHORIZED);
              }
         }else{
-            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            response = new ResponseEntity<>("Given customer is not valid",HttpStatus.NOT_FOUND);
         }
         return response;
     }

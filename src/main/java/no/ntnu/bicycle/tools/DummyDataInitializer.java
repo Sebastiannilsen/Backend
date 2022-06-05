@@ -89,9 +89,9 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationRead
 
         orderRepository.saveAll(List.of(order1,order2));
 
-        Bicycle bicycle = new Bicycle("Brown", "62.47433372997846, 6.164537350482638", 1, "NEW");
+        Bicycle bicycle = new Bicycle("Brown", "62.47433372997846, 6.164537350482638", 1);
         bicycle.setStatusToAvailable();
-        Bicycle bicycle1 = new Bicycle("Green", "62.47309499833774, 6.153352263095387", 1, "NEW");
+        Bicycle bicycle1 = new Bicycle("Green", "62.47309499833774, 6.153352263095387", 1);
         bicycle1.setStatusToAvailable();
 
         bicycleRepository.saveAll(List.of(bicycle, bicycle1));

@@ -27,11 +27,11 @@ public class Bicycle {
      * @param location location of the bicycle
      * @param pricePerMinute price per minute for the bicycle
      */
-    public Bicycle(String color, String location, int pricePerMinute, String status) {
+    public Bicycle(String color, String location, int pricePerMinute) {
         this.color = color;
         this.pricePerMinute = pricePerMinute;
         this.location = location;
-        this.status = status;
+        this.status = "NEW";
     }
 
     /**
@@ -152,5 +152,13 @@ public class Bicycle {
 
     public void setStatusToNew() {
         this.status = "NEW";
+    }
+
+    public boolean isValid() {
+        if (this.color != null  && this.location != null) {
+            return !this.color.isBlank()  && !this.location.isBlank() && this.pricePerMinute > 0;
+        }else{
+            return false;
+        }
     }
 }

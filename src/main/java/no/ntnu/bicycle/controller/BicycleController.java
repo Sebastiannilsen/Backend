@@ -32,11 +32,9 @@ public class BicycleController {
     @GetMapping
     public ResponseEntity<List<Bicycle>> getAllBicycles() {
         ResponseEntity<List<Bicycle>> response;
-        try {
-            response = new ResponseEntity<>(bicycleService.getAllBicycles(), HttpStatus.OK) ;
-        }catch (Exception e){
-            response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+
+        response = new ResponseEntity<>(bicycleService.getAllBicycles(), HttpStatus.OK) ;
+
         return response;
     }
 
@@ -58,10 +56,15 @@ public class BicycleController {
     @PostMapping
     public ResponseEntity<String> addBicycle(@RequestBody Bicycle bicycle) {
         ResponseEntity<String> response;
-        if (bicycleService.addBicycle(bicycle)) {
-            response = new ResponseEntity<>(HttpStatus.OK);
-        } else {
-            response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (bicycle.isValid()) {
+            bicycle.setStatusToNew();
+            if (bicycleService.addBicycle(bicycle)) {
+                response = new ResponseEntity<>(HttpStatus.CREATED);
+            } else {
+                response = new ResponseEntity<>("Bicycle already in system",HttpStatus.BAD_REQUEST);
+            }
+        }else{
+            response = new ResponseEntity<>("Not a valid bicycle",HttpStatus.BAD_REQUEST);
         }
         return response;
     }
