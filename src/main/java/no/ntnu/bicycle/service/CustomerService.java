@@ -107,12 +107,14 @@ public class CustomerService {
     /**
      * Deletes a customer
      * @param customerId int. Customer Id that gets deleted
-     * @return true if customer is deleted, and false if it does not exist
      */
-    public boolean deleteCustomer(int customerId) {
+    public String deleteCustomer(int customerId) {
         Optional<Customer> customer = customerRepository.findById((long) customerId);
-        customer.ifPresent(value -> customerRepository.delete(value));
-        return customer.isPresent();
+        if (customer.isPresent()) {
+            customerRepository.delete(customer.get());
+            return "customer deleted successfully";
+        }
+        return "customer does not exist in DB";
     }
 
     /**

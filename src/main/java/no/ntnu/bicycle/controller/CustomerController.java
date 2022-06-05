@@ -4,6 +4,7 @@ import no.ntnu.bicycle.model.BillingAndShippingAddress;
 import no.ntnu.bicycle.model.Customer;
 import no.ntnu.bicycle.service.CustomerService;
 import no.ntnu.bicycle.service.ProductService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -49,15 +50,9 @@ public class CustomerController {
      * @return Customer with the given ID or status 404
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getOneCustomer(@PathParam("costumer") @PathVariable("id") int customerId){
-        ResponseEntity<Customer> response;
-        Customer customer = customerService.findCustomerById(customerId);
-        if (customer != null) {
-            response = new ResponseEntity<>(customer, HttpStatus.OK);
-        } else {
-            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return response;
+    public Customer getOneCustomer(@PathParam("costumer")
+                                   @PathVariable("id") int customerId) {
+        return customerService.findCustomerById(customerId);
     }
 
     /**
@@ -114,9 +109,9 @@ public class CustomerController {
         if (customer != null) {
             customer.setAddress(address);
             customerService.updateCustomer(customer.getId(), customer);
-            response = new ResponseEntity<>(HttpStatus.OK);
+            response = new ResponseEntity<>("Address updated", HttpStatus.OK);
         } else {
-            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            response = new ResponseEntity<>("Address could not be found", HttpStatus.NOT_FOUND);
         }
         return response;
     }
@@ -130,7 +125,7 @@ public class CustomerController {
     @PostMapping(consumes = "application/json")
     public ResponseEntity<String> registerNewCustomer(@RequestBody Customer customer)  {
         ResponseEntity<String> response;
-        if (customerService.addNewCustomer(customer)) {
+        if (customerService.addNewCustomer(customer) && customer.isValid()) {
             response = new ResponseEntity<>("OK",HttpStatus.OK);
         } else {
             response = new ResponseEntity<>("Could not create customer",HttpStatus.BAD_REQUEST);

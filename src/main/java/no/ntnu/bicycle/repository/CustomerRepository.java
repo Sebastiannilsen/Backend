@@ -15,7 +15,7 @@ public interface CustomerRepository extends CrudRepository<Customer, Long> {
     /**
      * Gets a customer that has this email
      * @param email email to look for
-     * @return the user that natcged this email
+     * @return the user that has this email
      */
     @Query(value = "SELECT * FROM public.customer where email = :email", nativeQuery = true)
     Optional<Customer> findByEmail(@Param("email") String email);

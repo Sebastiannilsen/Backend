@@ -9,6 +9,8 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -103,13 +105,22 @@ public class Customer {
 
 
     /**
-     * Getters and setters
-     *
-     * @return values boolean
+     * Checks if the customer is valid
+     * @return True when valid, false when invalid
      */
     @JsonIgnore
     public boolean isValid() {
-        return !"".equals(firstName);
+        String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
+        Pattern pattern = Pattern.compile(regex);
+
+        boolean nameFirst = "".equals(firstName);
+        boolean nameLast = "".equals(lastName);
+        boolean email1 = "".equals(email);
+        Matcher emailFormat = pattern.matcher(email);
+        boolean password1 = "".equals(password);
+
+        return !nameFirst && !nameLast && !email1 && !password1 && dob != null && age > 0
+                && emailFormat.equals(false);
     }
 
     /**
