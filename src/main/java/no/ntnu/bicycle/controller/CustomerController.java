@@ -5,16 +5,17 @@ import no.ntnu.bicycle.model.BillingAndShippingAddress;
 import no.ntnu.bicycle.model.Customer;
 import no.ntnu.bicycle.service.CustomerService;
 import no.ntnu.bicycle.service.ProductService;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpServerErrorException;
 
 import javax.websocket.server.PathParam;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * REST API controller for customer.
@@ -151,7 +152,7 @@ public class CustomerController {
         if (customer != null) {
             String generatedPassword = customerService.resetPassword(email);
             if (generatedPassword != null){
-                response = new ResponseEntity<>(generatedPassword,HttpStatus.OK);
+                response = new ResponseEntity<>(generatedPassword, HttpStatus.OK);
             }
         } else {
             response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -179,16 +180,16 @@ public class CustomerController {
         String oldPassword = stringArray[3];
         String newPassword = stringArray[7];
         Customer customer = customerService.findCustomerByEmail(email);
-        if (customer.isValid()){
+        if (customer.isValid() && customer.isPasswordValid() && customer.isEmailValid()){
              if(new BCryptPasswordEncoder().matches(oldPassword, customer.getPassword())){
                 customer.setPassword(new BCryptPasswordEncoder().encode(newPassword));
                 customerService.updateCustomer(customer.getId(),customer);
                  response = new ResponseEntity<>(HttpStatus.OK);
             }else{
-                 response = new ResponseEntity<>("Old password doesent match",HttpStatus.UNAUTHORIZED);
+                 response = new ResponseEntity<>("Old password doesn't match", HttpStatus.UNAUTHORIZED);
              }
         }else{
-            response = new ResponseEntity<>("Given customer is not valid",HttpStatus.NOT_FOUND);
+            response = new ResponseEntity<>("Given customer is not valid", HttpStatus.NOT_FOUND);
         }
         return response;
     }
@@ -199,8 +200,14 @@ public class CustomerController {
      * @param customerId customer to be deleted
      */
     @DeleteMapping("/{id}")
-    public void deleteCustomer(@PathVariable("id") int customerId) {
-        customerService.deleteCustomer(customerId);
+    public ResponseEntity<String> deleteCustomer(@PathVariable("id") int customerId){
+        ResponseEntity<String> response;
+        String errorMessage = customerService.deleteCustomer(customerId);
+        if (errorMessage == null) {
+            response = new ResponseEntity<>("Customer deleted successfully", HttpStatus.OK);
+        } else {
+            response = new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+        } return response;
     }
 
     /**
@@ -228,7 +235,8 @@ public class CustomerController {
      * @return
      */
     @DeleteMapping(value = "/deleteProductInCart")
-    public ResponseEntity<String> deleteProductInCart(@RequestBody int id){
+    public ResponseEntity<String> deleteProductInCart(@RequestBody int id)
+            throws HttpServerErrorException.InternalServerError {
         ResponseEntity<String> response;
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -244,5 +252,11 @@ public class CustomerController {
             response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         return response;
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<String> internalServerError(NoSuchElementException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
 }

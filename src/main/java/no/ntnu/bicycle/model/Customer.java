@@ -126,7 +126,7 @@ public class Customer {
         Pattern pattern =
                 Pattern.compile("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\\\S+$).{8,}");
         Matcher matcher = pattern.matcher(password);
-        return matcher.find() && !"".equals(password);
+        return matcher.find() && !"".equals(password) && password != null;
     }
 
     /**
