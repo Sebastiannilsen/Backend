@@ -1,11 +1,15 @@
 package no.ntnu.bicycle.service;
 
 import no.ntnu.bicycle.model.BicycleRentalOrder;
+import no.ntnu.bicycle.model.CustomerOrder;
 import no.ntnu.bicycle.repository.BicycleRentalOrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -81,5 +85,24 @@ public class BicycleRentalOrderService {
         }catch (NoSuchElementException e){
             return -1;
         }
+    }
+
+    /**
+     * Gets all customer orders
+     * @return list of customer order
+     */
+    public List<BicycleRentalOrder> getAll() {
+        return iterableToList(bicycleRentalOrderRepository.findAll());
+    }
+
+    /**
+     * Makes iterable to list
+     * @param iterable Iterable<CustomerOrder>
+     * @return list of customer orders
+     */
+    public List<BicycleRentalOrder> iterableToList(Iterable<BicycleRentalOrder> iterable) {
+        List<BicycleRentalOrder> list = new LinkedList<>();
+        iterable.forEach(list::add);
+        return list;
     }
 }

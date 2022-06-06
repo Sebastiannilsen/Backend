@@ -6,17 +6,17 @@ import no.ntnu.bicycle.model.Customer;
 import no.ntnu.bicycle.service.BicycleRentalOrderService;
 import no.ntnu.bicycle.service.BicycleService;
 import no.ntnu.bicycle.service.CustomerService;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -34,40 +34,54 @@ public class RentalOrderController {
         this.customerService = customerService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<BicycleRentalOrder>> getAllBicycleRentalOrders(){
+        return new ResponseEntity<>(bicycleRentalOrderService.getAll(), HttpStatus.OK);
+    }
+
 
     /**
      * Creating bike rental order
      * @param http HttpEntity<String>
      * @return 200 OK if bike rental ordered, 400 bad request if not
      */
+    @PreAuthorize("hasRole('USER')")
     @PostMapping(value = "/create", consumes = "application/json")
-    public ResponseEntity<Long> createBikeRentalOrder(HttpEntity<String> http){
-
-        JSONObject jsonObject = new JSONObject(http.getBody());
-
-        long id = Long.parseLong(jsonObject.getString("bikeId"));
-        int pricePerMinute = Integer.parseInt(jsonObject.getString("pricePerMinute"));
-
-        ResponseEntity<Long> response;
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
+    public ResponseEntity<String> createBikeRentalOrder(HttpEntity<String> http){
+        ResponseEntity<String> response;
         try {
-            Customer customer = customerService.findCustomerByEmail(email);
-            Bicycle bicycle = bicycleService.findBicycleById(id);
+            JSONObject jsonObject = new JSONObject(http.getBody());
 
-            BicycleRentalOrder order = new BicycleRentalOrder(bicycle, customer, pricePerMinute);
+            long id = Long.parseLong(jsonObject.getString("bikeId"));
 
-            bicycleRentalOrderService.addBicycleRentalOrder(order);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = auth.getName();
+            if (!email.equals("anonymousUser")) {
+                if (!bicycleRentalOrderService.findBicycleRentalOrderById(id).isPresent()) {
+                    Customer customer = customerService.findCustomerByEmail(email);
+                    Bicycle bicycle = bicycleService.findBicycleById(id);
+                    if (bicycle.isAvailable()) {
 
-            bicycle.setStatusToRented();
+                        BicycleRentalOrder order = new BicycleRentalOrder(bicycle, customer, bicycle.getPricePerMinute());
 
-            bicycleService.updateBicycle(bicycle);
+                        bicycleRentalOrderService.addBicycleRentalOrder(order);
 
-            response = new ResponseEntity<>(order.getId(), HttpStatus.OK);
-        }catch (NoSuchElementException e){
-            e.printStackTrace();
-            response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                        bicycle.setStatusToRented();
+
+                        bicycleService.updateBicycle(bicycle);
+
+                        response = new ResponseEntity<>("Created new order with orderId: " + order.getId(), HttpStatus.OK);
+                    }else{
+                        response = new ResponseEntity<>("Bike not available for rent", HttpStatus.BAD_REQUEST);
+                    }
+                } else {
+                    response = new ResponseEntity<>("An order with that orderId already exist", HttpStatus.BAD_REQUEST);
+                }
+            }else{
+                response = new ResponseEntity<>("Need to log in", HttpStatus.UNAUTHORIZED);
+            }
+        }catch (JSONException e){
+            response = new ResponseEntity<>("Posted fields are invalid",HttpStatus.BAD_REQUEST);
         }
 
         return response;
@@ -75,25 +89,38 @@ public class RentalOrderController {
 
     /**
      * Ending bicycle order
-     * @param entity String
+     * @param http String
      * @return HTTP 200 OK if order ended and total price, HTTP not found if order is not found
      */
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/end")
-    public ResponseEntity<Integer> endBicycleOrder(@RequestBody String entity){
-        int id = Integer.parseInt(entity.split(",")[0]);
-        String endLocationLat = entity.split(",")[1];
-        String endLocationLon = entity.split(",")[2];
+    public ResponseEntity<String> endBicycleOrder(HttpEntity<String> http){
 
-        try{
-            Optional<BicycleRentalOrder> order = bicycleRentalOrderService.findBicycleRentalOrderById(id);
+        JSONObject jsonObject = new JSONObject(http.getBody());
 
-            int totalPrice = bicycleRentalOrderService.endBicycleRentalOrderAndReturnTotalPrice(order.get(), endLocationLat, endLocationLon);
+        int id = jsonObject.getInt("orderId");
+        String endLocationLat = jsonObject.getString("endLocationLat");
+        String endLocationLon = jsonObject.getString("endLocationLon");
 
-            bicycleService.setStatusToAvailable(bicycleRentalOrderService.getBicycleIdFromOrderId(id));
+        if (bicycleRentalOrderService.findBicycleRentalOrderById(id).isPresent()){
+            BicycleRentalOrder order = bicycleRentalOrderService.findBicycleRentalOrderById(id).get();
+            if (order.getTotalPrice() == 0 || order.getRentalEndTime() == null) {
 
-            return new ResponseEntity<>(totalPrice,HttpStatus.OK);
-        }catch (NoSuchElementException e){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                int totalPrice = bicycleRentalOrderService.endBicycleRentalOrderAndReturnTotalPrice(order, endLocationLat, endLocationLon);
+
+                long bicycleId = bicycleRentalOrderService.getBicycleIdFromOrderId(id);
+
+                Bicycle bicycle = bicycleService.findBicycleById(bicycleId);
+                bicycle.setStatusToAvailable();
+                bicycle.setLocation(endLocationLat + "," + endLocationLon);
+                bicycleService.updateBicycle(bicycle);
+
+                return new ResponseEntity<>("Rental ended. Total price is: " + totalPrice + " NOK", HttpStatus.OK);
+            }else{
+                return new ResponseEntity<>("Order already ended",HttpStatus.BAD_REQUEST);
+            }
+        }else{
+            return new ResponseEntity<>("No order found with that order id",HttpStatus.NOT_FOUND);
         }
     }
 }
