@@ -72,13 +72,13 @@ public class CustomerService {
         if (customerRepository.findByEmail(customer.getEmail()).isPresent()) {
             errorMessage = "Customer already exists";
         }
-        else if (customer != null && !customer.isValid()) {
+        else if (!customer.isValid()) {
             errorMessage = "Customer not added. Invalid name.";
         }
-        else if (customer != null && !customer.isEmailValid()) {
+        else if (!customer.isEmailValid()) {
             errorMessage = "Customer not added. Invalid email";
         }
-        else if (customer != null && customer.isPasswordValid()) {
+        else if (customer.isPasswordValid()) {
             errorMessage = "Customer not added. Invalid password";
         }
         if (errorMessage == null) {
@@ -119,21 +119,29 @@ public class CustomerService {
     /**
      * Deletes a customer
      * @param customerId int. Customer Id that gets deleted
+     * @return
      */
-    public String deleteCustomer(int customerId) {
-        String errorMessage = null;
-        Optional<Customer> customer = customerRepository.findById((long) customerId);
-        customerRepository.delete(customer.get());
-        if (customer.isEmpty()) {
-            errorMessage = "customer does not exist in DB";
-        } else if (customerId == 0) {
-            errorMessage = "customer id does not exist";
+    public String deleteCustomer(long customerId) {
+            String errorMessage = null;
+            Optional<Customer> customer = customerRepository.findById(customerId);
+            if (customer.isPresent()) {
+                customerRepository.delete(customer.get());
+            } else {
+                errorMessage = "Customer not found in database";
+            }
+            return errorMessage;
         }
-        if (errorMessage == null) {
-            customerRepository.delete(customer.get());
+
+       /* if (customerRepository.existsById(customer.get().getId())) {
+            try{
+                customerRepository.delete(customer.get());
+        } catch (Exception e){
+            throw e;
         }
-        return errorMessage;
-    }
+        }else {
+            errorMessage =
+            return "Customer does not exist in DB";
+        }*/
 
     /**
      * Updates a customer

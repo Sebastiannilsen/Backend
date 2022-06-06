@@ -198,17 +198,21 @@ public class CustomerController {
     /**
      * Deletes a customer
      * @param customerId customer to be deleted
+     * @return
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCustomer(@PathVariable("id") int customerId){
         ResponseEntity<String> response;
         String errorMessage = customerService.deleteCustomer(customerId);
         if (errorMessage == null) {
-            response = new ResponseEntity<>("Customer deleted successfully", HttpStatus.OK);
+            response = new ResponseEntity<>("Customer " + customerId +
+                    " successfully deleted.", HttpStatus.OK);
         } else {
             response = new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
-        } return response;
+        }
+        return response;
     }
+
 
     /**
      * Update customer
