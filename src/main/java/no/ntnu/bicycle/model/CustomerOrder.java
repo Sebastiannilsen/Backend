@@ -2,6 +2,8 @@ package no.ntnu.bicycle.model;
 
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -106,6 +108,7 @@ public class CustomerOrder {
      * Checks if order is valid
      * @return true if order is valid, false else
      */
+    @JsonIgnore
     public boolean isValid() {
         return customer.isValid() && !products.isEmpty() && dateAndTime == null && "".equals(email);
     }
