@@ -72,9 +72,15 @@ public class ProductController {
     @PostMapping()
     public ResponseEntity<String> addNewProduct(@RequestBody Product product) {
         ResponseEntity<String> response;
-
-        Product existingProduct = productService.getProductById(product.getId());
-        if (product.isValid()){
+        String errorMessage = productService.addNewProduct(product);
+        if (errorMessage == null) {
+            response = new ResponseEntity<>("Product " + product.getProductName() +
+                    " added", HttpStatus.CREATED);
+        } else {
+            response = new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+        /*if (product.isValid()){
             if (existingProduct == null) {
                 if (productService.addNewProduct(product)) {
                     response = new ResponseEntity<>("Product successfully added",HttpStatus.CREATED);
@@ -87,7 +93,7 @@ public class ProductController {
         }else{
             response = new ResponseEntity<>("Invalid fields for bike in request", HttpStatus.BAD_REQUEST);
         }
-        return response;
+        return response;*/
     }
 
 

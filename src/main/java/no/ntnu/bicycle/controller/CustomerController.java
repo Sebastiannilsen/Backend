@@ -8,6 +8,7 @@ import no.ntnu.bicycle.service.CustomerService;
 import no.ntnu.bicycle.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -42,6 +43,7 @@ public class CustomerController {
      * HTTP get
      * @return list of all customers
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<Customer> getAllCustomers() {
         return customerService.getAllCustomers();

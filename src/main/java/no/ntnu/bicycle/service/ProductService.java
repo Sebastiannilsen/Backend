@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Business logic related to products
@@ -47,13 +48,16 @@ public class ProductService {
      * @param product Product
      * @return true if product added, false if not
      */
-    public boolean addNewProduct(Product product) {
-        boolean added = false;
-        if (product != null) {
+    public String addNewProduct(Product product) {
+        Optional<Product> existingProduct = productRepository.findById(product.getId());
+        String errorMessage = null;
+        if (existingProduct.isPresent()) {
+            errorMessage = "Product already exists";
+        } else if (!product.isValid()){
+            errorMessage = "Product not added. Invalid fields for bike in request. ";
+        } else {
             productRepository.save(product);
-            added = true;
-        }
-        return added;
+        } return errorMessage;
     }
 
 
@@ -77,12 +81,11 @@ public class ProductService {
         if (existingProduct == null) {
             errorMessage = "No customerOrder with " + id + "found";
         }
-        if (product == null) {
+        else if (product == null) {
             errorMessage = "Wrong data in request body";
         } else if (product.getId() != id) {
             errorMessage = "Wrong id, does not match";
         }
-
         if (errorMessage == null) {
             productRepository.save(product);
         }
