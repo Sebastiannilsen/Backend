@@ -158,7 +158,7 @@ public class CustomerService {
      String errorMessage = "";
      Customer existingCustomer = findCustomerByEmail(customer.getEmail());
      if (existingCustomer == null) {
-         errorMessage = "No customer with email " + customer.getEmail() + "exists";
+         errorMessage = "No customer with email " + customer.getEmail() + " exists";
      } else if (!customer.isValid()) {
          errorMessage = "Invalid data";
      } else if (!customer.getEmail().equals(existingCustomer.getEmail())) {
