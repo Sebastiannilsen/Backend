@@ -124,9 +124,9 @@ public class Customer {
     @JsonIgnore
     public boolean isPasswordValid() {
         Pattern pattern =
-                Pattern.compile("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\\\S+$).{8,}");
+                Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$");
         Matcher matcher = pattern.matcher(password);
-        return matcher.find() && !"".equals(password) && password != null;
+        return matcher.find() && !password.isEmpty() && password != null;
     }
 
     /**

@@ -45,11 +45,16 @@ public class CustomerService {
      */
     public Customer findCustomerById(long id) {
         Optional<Customer> customer = customerRepository.findById(id);
-        return customer.get();
-        /*if (optionalCustomer.isEmpty()) {
-            throw new IllegalArgumentException("Cannot find the customer");
+        if (customer.isPresent()){
+            return customer.get();
+        }else{
+            return null;
         }
-        return optionalCustomer.get();*/
+    }
+
+    public boolean isCustomerAlreadyInDatabase(long id){
+        Optional<Customer> customer = customerRepository.findById(id);
+        return customer.isPresent();
     }
 
     /**
@@ -68,7 +73,7 @@ public class CustomerService {
      * @return true if the customer got added, false if it did not get added
      */
     public String addNewCustomer(Customer customer){
-        String errorMessage = null;
+        String errorMessage = "";
         if (customerRepository.findByEmail(customer.getEmail()).isPresent()) {
             errorMessage = "Customer already exists";
         }
@@ -78,18 +83,14 @@ public class CustomerService {
         else if (!customer.isEmailValid()) {
             errorMessage = "Customer not added. Invalid email";
         }
-        else if (customer.isPasswordValid()) {
+        else if (!customer.isPasswordValid()) {
             errorMessage = "Customer not added. Invalid password";
         }
-        if (errorMessage == null) {
-            try {
-                findCustomerById(customer.getId());
-            }catch (NoSuchElementException e) {
-                customer.setPassword(new BCryptPasswordEncoder().encode(customer.getPassword()));
-                customer.updateAge();
-                customer.setRole(Role.ROLE_USER);
-                customerRepository.save(customer);
-            }
+        else{
+            customer.setPassword(new BCryptPasswordEncoder().encode(customer.getPassword()));
+            customer.updateAge();
+            customer.setRole(Role.ROLE_USER);
+            customerRepository.save(customer);
         }
         return errorMessage;
     }

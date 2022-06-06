@@ -128,7 +128,7 @@ public class CustomerController {
     public ResponseEntity<String> registerNewCustomer(@RequestBody Customer customer) throws JsonProcessingException {
         ResponseEntity<String> response;
         String errorMessage = customerService.addNewCustomer(customer);
-        if (errorMessage == null) {
+        if (errorMessage.isEmpty()) {
             response = new ResponseEntity<>("Customer " + customer.getFirstName() +
                     " " + customer.getLastName() + " added", HttpStatus.CREATED);
         } else {
@@ -148,14 +148,14 @@ public class CustomerController {
         String[] stringArray = emailObject.split("\"" );
         String email = stringArray[3];
         ResponseEntity<String> response = null;
-            Customer customer = customerService.findCustomerByEmail(email);
-        if (customer != null) {
+        Customer customer = customerService.findCustomerByEmail(email);
+        if (customer != null && customer.isValid()) {
             String generatedPassword = customerService.resetPassword(email);
             if (generatedPassword != null){
-                response = new ResponseEntity<>(generatedPassword, HttpStatus.OK);
+                response = new ResponseEntity<>("Your new password is: " + generatedPassword, HttpStatus.OK);
             }
         } else {
-            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            response = new ResponseEntity<>("You are not logged in", HttpStatus.BAD_REQUEST);
         }
         return response;
     }
