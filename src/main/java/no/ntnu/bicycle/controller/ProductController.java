@@ -92,30 +92,6 @@ public class ProductController {
 
 
     /**
-     * Add product to cart
-     * @param idJsonObject String
-     * @return 200 OK if product added to cart, 400 bad request if not
-     */
-    @PostMapping(value = "/addToCart", consumes = "application/json")
-    public ResponseEntity<String> addProductToCart(@RequestBody String idJsonObject){
-            if (idJsonObject != null) {
-                String[] stringArray = idJsonObject.split("\"" );
-                int id = Integer.parseInt(stringArray[3]);
-                Product product = productService.getProductById(id);
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                String email = auth.getName();
-                if (email.equals("anonymousUser")){
-                    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-                }else{
-                    Customer customer = customerService.findCustomerByEmail(email);
-                    customer.addProductToShoppingCart(product);
-                    customerService.updateCustomer(customer);
-                    return new ResponseEntity<>(HttpStatus.OK);
-            }}
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
-
-    /**
      * Get products in cart
      * @return 200 OK status on success, 400 bad request if it does not get products in cart
      */

@@ -3,6 +3,7 @@ package no.ntnu.bicycle.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import no.ntnu.bicycle.model.BillingAndShippingAddress;
 import no.ntnu.bicycle.model.Customer;
+import no.ntnu.bicycle.model.Product;
 import no.ntnu.bicycle.service.CustomerService;
 import no.ntnu.bicycle.service.ProductService;
 import org.springframework.http.HttpStatus;
@@ -232,6 +233,30 @@ public class CustomerController {
     }
 
     /**
+     * Add product to cart
+     * @param idJsonObject String
+     * @return 200 OK if product added to cart, 400 bad request if not
+     */
+    @PostMapping(value = "/addToCart", consumes = "application/json")
+    public ResponseEntity<String> addProductToCart(@RequestBody String idJsonObject){
+        if (idJsonObject != null) {
+            String[] stringArray = idJsonObject.split("\"" );
+            int id = Integer.parseInt(stringArray[3]);
+            Product product = productService.getProductById(id);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = auth.getName();
+            if (email.equals("anonymousUser")){
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }else{
+                Customer customer = customerService.findCustomerByEmail(email);
+                customer.addProductToShoppingCart(product);
+                customerService.updateCustomer(customer);
+                return new ResponseEntity<>(HttpStatus.OK);
+            }}
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    /**
      * Deletes a product in the cart
      * @param id the id of the product
      * @return
@@ -255,6 +280,7 @@ public class CustomerController {
         }
         return response;
     }
+
 
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

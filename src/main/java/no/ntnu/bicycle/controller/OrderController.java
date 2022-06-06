@@ -4,6 +4,7 @@ import no.ntnu.bicycle.model.CustomerOrder;
 import no.ntnu.bicycle.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -28,24 +29,12 @@ public class OrderController {
     /**
      * Get all orders
      * HTTP get to /orders
-     * @param localDateTime Product. When specified, get all orders with a product including this substring, case-insensitive.
-     * @param email Customer. When specified, get all orders from a customer including this substring, case-insensitive.
      * @return List of all orders currently stored in the database.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping()
-    public Object getAllOrders(@RequestParam(required = false) String email,
-                               @RequestParam(required = false) LocalDateTime localDateTime) {
-        if (localDateTime != null) {
-            if (email != null && !"".equals(email)) {
-                return orderService.getAllOrdersByCustomerAndProduct(email, localDateTime);
-            } else {
-                return orderService.getAllOrdersByDateAndTime(localDateTime);
-            }
-        } else if(email != null && !"".equals(email)) {
-            return orderService.getAllOrdersByEmail(email);
-        } else {
-            return orderService.getAll();
-        }
+    public Object getAllOrders() {
+       return orderService.getAll();
     }
 
     /**
