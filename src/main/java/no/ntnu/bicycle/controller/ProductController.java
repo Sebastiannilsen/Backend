@@ -111,7 +111,6 @@ public class ProductController {
 
     /**
      * Deletes product
-     * @param product Product
      * @return HTTP 200 OK if product deleted, HTTP not found if it did not get deleted
      */
     @DeleteMapping("/{id}")

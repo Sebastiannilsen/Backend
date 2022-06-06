@@ -75,7 +75,6 @@ public class OrderService {
      */
     private boolean canBeAdded(CustomerOrder customerOrder) {
         return customerOrder != null;
-
     }
 
     /**

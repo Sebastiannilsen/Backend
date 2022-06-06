@@ -234,7 +234,7 @@ public class CustomerController {
 
     /**
      * Add product to cart
-     * @param idJsonObject String
+     * @param idJsonObject the id of the product
      * @return 200 OK if product added to cart, 400 bad request if not
      */
     @PostMapping(value = "/addToCart", consumes = "application/json")
@@ -246,14 +246,14 @@ public class CustomerController {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth.getName();
             if (email.equals("anonymousUser")){
-                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>("Need to be logged in",HttpStatus.UNAUTHORIZED);
             }else{
                 Customer customer = customerService.findCustomerByEmail(email);
                 customer.addProductToShoppingCart(product);
                 customerService.updateCustomer(customer);
                 return new ResponseEntity<>(HttpStatus.OK);
             }}
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Posted fields are invalid",HttpStatus.BAD_REQUEST);
     }
 
     /**
