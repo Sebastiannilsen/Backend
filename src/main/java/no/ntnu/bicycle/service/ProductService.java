@@ -72,7 +72,7 @@ public class ProductService {
     }
 
     public String updateProduct(int id, Product product) {
-        Product existingProduct = findOrderById(id);
+        Product existingProduct = this.getProductById(id);
         String errorMessage = null;
         if (existingProduct == null) {
             errorMessage = "No customerOrder with " + id + "found";
@@ -94,8 +94,12 @@ public class ProductService {
      * @param id Integer
      * @return The author or null if none found by that ID
      */
-    public Product findOrderById(Integer id) {
-        return productRepository.findById(id).orElse(null);
+    public Product getProductById(int id) {
+        if (productRepository.findById(id).isPresent()) {
+            return productRepository.findById(id).get();
+        }else{
+            return null;
+        }
     }
 
     public List<Product> getAllProductsByCustomer(String customer) {
@@ -110,12 +114,6 @@ public class ProductService {
         return null;
     }
 
-    public Product getProductById(int id) {
-        if (productRepository.findById(id).isPresent()) {
-            return productRepository.findById(id).get();
-        }else{
-            return null;
-        }
-    }
+
 }
 

@@ -64,7 +64,11 @@ public class CustomerService {
      */
     public Customer findCustomerByEmail(String email) {
         Optional<Customer> customer = customerRepository.findByEmail(email);
-        return customer.get();
+        if (customer.isPresent()){
+            return customer.get();
+        }else{
+            return null;
+        }
     }
 
     /**
@@ -109,7 +113,7 @@ public class CustomerService {
         Optional<Customer> customer = customerRepository.findByEmail(email);
         if (customer.isPresent()) {
             customer.get().setPassword(new BCryptPasswordEncoder().encode(generatedPassword));
-            updateCustomer(customer.get().getId(),customer.get());
+            updateCustomer(customer.get());
         }else{
             generatedPassword = null;
         }
@@ -146,23 +150,22 @@ public class CustomerService {
 
     /**
      * Updates a customer
-     * @param customerId long. Id that gets updated
      * @param customer Customer. customer that gets updated.
      * @return null on success, error message on error
      */
     @Transactional
-    public String updateCustomer(long customerId, Customer customer) {
-     String errorMessage = null;
-     Customer existingCustomer = findCustomerById(customerId);
+    public String updateCustomer(Customer customer) {
+     String errorMessage = "";
+     Customer existingCustomer = findCustomerByEmail(customer.getEmail());
      if (existingCustomer == null) {
-         errorMessage = "No customer with id " + customerId + "exists";
-     } else if (customer == null || !customer.isValid()) {
+         errorMessage = "No customer with email " + customer.getEmail() + "exists";
+     } else if (!customer.isValid()) {
          errorMessage = "Invalid data";
-     } else if (customer.getId() != customerId) {
-         errorMessage = "Id does not match";
+     } else if (!customer.getEmail().equals(existingCustomer.getEmail())) {
+         errorMessage = "Email does not match";
      }
 
-     if (errorMessage == null) {
+     if (errorMessage.isEmpty()) {
          customerRepository.save(customer);
      }
      return errorMessage;

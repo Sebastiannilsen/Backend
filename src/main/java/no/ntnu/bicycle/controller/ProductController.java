@@ -11,7 +11,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Properties;
 
 /**
  * REST API controller for product.
@@ -60,7 +59,7 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<Product> getOne(@PathVariable Integer id) {
         ResponseEntity<Product> response;
-        Product product = productService.findOrderById(id);
+        Product product = productService.getProductById(id);
         if (product != null) {
             response = new ResponseEntity<>(product, HttpStatus.OK);
         } else {
@@ -102,7 +101,7 @@ public class ProductController {
             if (idJsonObject != null) {
                 String[] stringArray = idJsonObject.split("\"" );
                 int id = Integer.parseInt(stringArray[3]);
-                Product product = productService.findOrderById(id);
+                Product product = productService.getProductById(id);
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 String email = auth.getName();
                 if (email.equals("anonymousUser")){
@@ -110,7 +109,7 @@ public class ProductController {
                 }else{
                     Customer customer = customerService.findCustomerByEmail(email);
                     customer.addProductToShoppingCart(product);
-                    customerService.updateCustomer(customer.getId(), customer);
+                    customerService.updateCustomer(customer);
                     return new ResponseEntity<>(HttpStatus.OK);
             }}
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -140,8 +139,9 @@ public class ProductController {
      * @return HTTP 200 OK if product deleted, HTTP not found if it did not get deleted
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable Product product) {
+    public ResponseEntity<String> deleteProduct(@PathVariable Integer id) {
         ResponseEntity<String> response;
+        Product product = productService.getProductById(id);
         if (productService.deletingProduct(product)) {
             response = new ResponseEntity<>(HttpStatus.OK);
         } else {

@@ -110,7 +110,7 @@ public class CustomerController {
         Customer customer = customerService.findCustomerByEmail(customerEmail);
         if (customer != null) {
             customer.setAddress(address);
-            customerService.updateCustomer(customer.getId(), customer);
+            customerService.updateCustomer(customer);
             response = new ResponseEntity<>("Address updated", HttpStatus.OK);
         } else {
             response = new ResponseEntity<>("Address could not be found", HttpStatus.NOT_FOUND);
@@ -183,7 +183,7 @@ public class CustomerController {
         if (customer.isValid() && customer.isPasswordValid() && customer.isEmailValid()){
              if(new BCryptPasswordEncoder().matches(oldPassword, customer.getPassword())){
                 customer.setPassword(new BCryptPasswordEncoder().encode(newPassword));
-                customerService.updateCustomer(customer.getId(),customer);
+                customerService.updateCustomer(customer);
                  response = new ResponseEntity<>(HttpStatus.OK);
             }else{
                  response = new ResponseEntity<>("Old password doesn't match", HttpStatus.UNAUTHORIZED);
@@ -216,16 +216,14 @@ public class CustomerController {
 
     /**
      * Update customer
-     * @param id id of the customer that needs to be updated
      * @param customer customer that needs to be updated
      * @return 200 OK status on success or 400 bad request if it does not get updated
      */
-    @PutMapping("/{id}")
-    public ResponseEntity<String> update(@PathVariable int id,
-                                         @RequestBody Customer customer) {
-        String errorMessage = customerService.updateCustomer(id, customer);
+    @PutMapping()
+    public ResponseEntity<String> update(@RequestBody Customer customer) {
+        String errorMessage = customerService.updateCustomer(customer);
         ResponseEntity<String> response;
-        if (errorMessage == null) {
+        if (errorMessage.isEmpty()) {
             response = new ResponseEntity<>(HttpStatus.OK);
         } else {
             response = new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
@@ -249,8 +247,8 @@ public class CustomerController {
         Customer customer = customerService.findCustomerByEmail(email);
 
         if (customer != null && customer.isValid()) {
-            customer.removeFromShoppingCart(productService.findOrderById(id));
-            customerService.updateCustomer(customer.getId(), customer);
+            customer.removeFromShoppingCart(productService.getProductById(id));
+            customerService.updateCustomer(customer);
             response = new ResponseEntity<>(HttpStatus.OK);
         } else {
             response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
