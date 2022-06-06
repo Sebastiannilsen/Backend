@@ -1,13 +1,22 @@
 package no.ntnu.bicycle.controller;
 
+import no.ntnu.bicycle.model.Customer;
 import no.ntnu.bicycle.model.CustomerOrder;
+import no.ntnu.bicycle.model.Product;
+import no.ntnu.bicycle.service.CustomerService;
 import no.ntnu.bicycle.service.OrderService;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * REST API controller for orders.
@@ -16,14 +25,16 @@ import java.time.LocalDateTime;
 @RequestMapping("/api/orders")
 public class OrderController {
     private OrderService orderService;
+    private CustomerService customerService;
 
 
     /**
      * Constructor with parameters
      * @param orderService order service
      */
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, CustomerService customerService) {
         this.orderService = orderService;
+        this.customerService = customerService;
     }
 
     /**
@@ -39,17 +50,33 @@ public class OrderController {
 
     /**
      * Add an order to the database.
-     * @param customerOrder order to be added, from HTTP response body
      * @return 200 OK status on success, 400 bad request on error
      */
     @PostMapping(consumes = "application/json")
-    public ResponseEntity<String> add(@RequestBody CustomerOrder customerOrder) {
+    public ResponseEntity<String> add(HttpEntity<String> http) {
         ResponseEntity<String> response;
+    try {
+        JSONObject json = new JSONObject(http.getBody());
+
+        String email = json.getString("email");
+
+        Customer customer = customerService.findCustomerByEmail(email);
+
+        List<Product> list = customer.getShoppingCart();
+
+        customer.clearShoppingCart();
+
+        CustomerOrder customerOrder = new CustomerOrder(customer, list);
+
         if (orderService.addNewOrder(customerOrder)) {
-            response = new ResponseEntity<>(HttpStatus.OK);
+            response = new ResponseEntity<>("Order created",HttpStatus.OK);
         } else {
-            response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            response = new ResponseEntity<>("Cold not create order",HttpStatus.BAD_REQUEST);
         }
+
+    }catch (JSONException e){
+        response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
         return response;
     }
 

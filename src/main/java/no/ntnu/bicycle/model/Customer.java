@@ -254,7 +254,13 @@ public class Customer {
      * @return shopping cart
      */
     public List<Product> getShoppingCart() {
-        return shoppingCart;
+        return new ArrayList<>(shoppingCart);
+    }
+
+    public void clearShoppingCart(){
+        if (!shoppingCart.isEmpty()) {
+            shoppingCart.subList(0, shoppingCart.size()).clear();
+        }
     }
 
     /**

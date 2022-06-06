@@ -97,23 +97,6 @@ public class ProductController {
     }
 
 
-    /**
-     * Get products in cart
-     * @return 200 OK status on success, 400 bad request if it does not get products in cart
-     */
-    @GetMapping(value = "/shopping-cart", produces = "application/json")
-    public ResponseEntity<List<Product>> getProductsInCart(){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        Customer customer = customerService.findCustomerByEmail(email);
-        List<Product> products = customer.getShoppingCart();
-        if (!products.isEmpty()) {
-            return new ResponseEntity<>(products,HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-
 
     /**
      * Deletes product

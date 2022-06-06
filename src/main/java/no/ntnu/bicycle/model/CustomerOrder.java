@@ -36,9 +36,9 @@ public class CustomerOrder {
      * Constructor with parameters.
      * @param customer the customer ordering
      */
-    public CustomerOrder(Customer customer) {
+    public CustomerOrder(Customer customer, List<Product> products) {
         this.customer = customer;
-        this.products = customer.getShoppingCart();
+        this.products = products;
         this.dateAndTime = LocalDateTime.now();
         this.email = customer.getEmail();
     }

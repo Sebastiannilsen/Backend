@@ -6,6 +6,9 @@ import no.ntnu.bicycle.model.Customer;
 import no.ntnu.bicycle.model.Product;
 import no.ntnu.bicycle.service.CustomerService;
 import no.ntnu.bicycle.service.ProductService;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -234,54 +237,6 @@ public class CustomerController {
         return response;
     }
 
-    /**
-     * Add product to cart
-     * @param idJsonObject the id of the product
-     * @return 200 OK if product added to cart, 400 bad request if not
-     */
-    @PostMapping(value = "/addToCart", consumes = "application/json")
-    public ResponseEntity<String> addProductToCart(@RequestBody String idJsonObject){
-        if (idJsonObject != null) {
-            String[] stringArray = idJsonObject.split("\"" );
-            int id = Integer.parseInt(stringArray[3]);
-            Product product = productService.getProductById(id);
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String email = auth.getName();
-            if (email.equals("anonymousUser")){
-                return new ResponseEntity<>("Need to be logged in",HttpStatus.UNAUTHORIZED);
-            }else{
-                Customer customer = customerService.findCustomerByEmail(email);
-                customer.addProductToShoppingCart(product);
-                customerService.updateCustomer(customer);
-                return new ResponseEntity<>(HttpStatus.OK);
-            }}
-        return new ResponseEntity<>("Posted fields are invalid",HttpStatus.BAD_REQUEST);
-    }
-
-    /**
-     * Deletes a product in the cart
-     * @param id the id of the product
-     * @return
-     */
-    @DeleteMapping(value = "/deleteProductInCart")
-    public ResponseEntity<String> deleteProductInCart(@RequestBody int id)
-            throws HttpServerErrorException.InternalServerError {
-        ResponseEntity<String> response;
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-
-        Customer customer = customerService.findCustomerByEmail(email);
-
-        if (customer != null && customer.isValid()) {
-            customer.removeFromShoppingCart(productService.getProductById(id));
-            customerService.updateCustomer(customer);
-            response = new ResponseEntity<>(HttpStatus.OK);
-        } else {
-            response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        return response;
-    }
 
 
     @ExceptionHandler(NoSuchElementException.class)
