@@ -1,14 +1,12 @@
 package no.ntnu.bicycle.controller;
 
 import no.ntnu.bicycle.model.Bicycle;
-import no.ntnu.bicycle.model.Customer;
 import no.ntnu.bicycle.service.BicycleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -121,7 +119,7 @@ public class BicycleController {
         ResponseEntity<String> response;
         if (bicycleService.findBicycleById(bikeId) != null) {
             if (bicycleService.deleteBicycle(bikeId)) {
-                response = new ResponseEntity<>(HttpStatus.OK);
+                response = new ResponseEntity<>("Bike deleted",HttpStatus.OK);
             }else{
                 response = new ResponseEntity<>("Could not delete the bike",HttpStatus.BAD_REQUEST);
             }

@@ -11,11 +11,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -52,8 +49,9 @@ public class OrderController {
      * Add an order to the database.
      * @return 200 OK status on success, 400 bad request on error
      */
+    @PreAuthorize("hasRole('USER')")
     @PostMapping(consumes = "application/json")
-    public ResponseEntity<String> add(HttpEntity<String> http) {
+    public ResponseEntity<String> addNewOrder(HttpEntity<String> http) {
         ResponseEntity<String> response;
     try {
         JSONObject json = new JSONObject(http.getBody());
