@@ -36,12 +36,12 @@ public class ProductService {
         return list;
     }
 
+
     /**
      * Gets all products
      * @return list of products
      */
     public List<Product> getAllProducts() {return iterableToList(productRepository.findAll());}
-
 
     /**
      * Adding a product
@@ -66,13 +66,15 @@ public class ProductService {
      * @param product Product
      * @return true if deleted, false if not
      */
-    public boolean deletingProduct(Product product) {
-        boolean deleted = false;
-        if (product != null) {
+    public String deletingProduct(Product product) {
+        String errorMessage = null;
+        if (product == null) {
+            errorMessage = "Product can not be found.";
+        } else if (!product.isValid()) {
+            errorMessage = "Product is not valid.";
+        } else {
             productRepository.delete(product);
-            deleted = true;
-        }
-        return deleted;
+        } return errorMessage;
     }
 
     public String updateProduct(int id, Product product) {

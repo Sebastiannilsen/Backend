@@ -57,15 +57,26 @@ public class OrderService {
     /**
      * Adds new customer order
      * @param customerOrder CustomerOrder
-     * @return true when order added, false on error
+     * @return true when order added, false when not added
      */
-    public boolean addNewOrder(CustomerOrder customerOrder) {
-        boolean added = false;
+    public String addNewOrder(CustomerOrder customerOrder) {
+
+        String errorMessage = null;
+        if (!canBeAdded(customerOrder)) {
+            errorMessage = "Order did not get added.";
+        } else if (!customerOrder.isValid()) {
+            errorMessage = "Order did not get added. Plase check your input.";
+        } else {
+            orderRepository.save(customerOrder);
+
+        }
+        return errorMessage;
+        /*boolean added = false;
         if (canBeAdded(customerOrder)) {
             orderRepository.save(customerOrder);
             added = true;
         }
-        return added;
+        return added;*/
     }
 
     /**

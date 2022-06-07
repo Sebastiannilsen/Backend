@@ -21,8 +21,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
-    private OrderService orderService;
-    private CustomerService customerService;
+    private final OrderService orderService;
+    private final CustomerService customerService;
 
 
     /**
@@ -65,15 +65,16 @@ public class OrderController {
         customer.clearShoppingCart();
 
         CustomerOrder customerOrder = new CustomerOrder(customer, list);
+        String errorMessage = orderService.addNewOrder(customerOrder);
 
-        if (orderService.addNewOrder(customerOrder)) {
-            response = new ResponseEntity<>("Order created",HttpStatus.OK);
+        if (errorMessage == null) {
+            response = new ResponseEntity<>("Order successfully created.", HttpStatus.OK);
         } else {
-            response = new ResponseEntity<>("Cold not create order",HttpStatus.BAD_REQUEST);
+            response = new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
         }
 
     }catch (JSONException e){
-        response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        response = new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
         return response;
     }
@@ -82,6 +83,7 @@ public class OrderController {
      * Get a specific order
      * @param id Id of the order to be returned
      * @return Order with the given Id or status 404
+     * !TODO finish this
      */
     @GetMapping("/{id}")
     public ResponseEntity<CustomerOrder> getOne(@PathVariable Integer id) {
@@ -104,9 +106,11 @@ public class OrderController {
     public ResponseEntity<String> delete(@PathVariable int id) {
         ResponseEntity<String> response;
         if (orderService.deletingOrder(id)) {
-            response = new ResponseEntity<>(HttpStatus.OK);
+            response = new ResponseEntity<>("The order" + orderService.findOrderById(id) +
+                    "got successfully deleted.", HttpStatus.OK);
         } else {
-            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            response = new ResponseEntity<>("The order cannot be found. " +
+                    "Are you sure the input is correct? ", HttpStatus.NOT_FOUND);
         }
         return response;
     }
@@ -118,11 +122,12 @@ public class OrderController {
      * @return 200 OK success, 400 bad request on error
      */
     @PutMapping
-    public ResponseEntity<String> update(@PathVariable int id, @RequestBody CustomerOrder customerOrder) {
+    public ResponseEntity<String> update(@PathVariable int id,
+                                         @RequestBody CustomerOrder customerOrder) {
         String errorMessage = orderService.update(id, customerOrder);
         ResponseEntity<String> response;
         if (errorMessage == null) {
-            response = new ResponseEntity<>(HttpStatus.OK);
+            response = new ResponseEntity<>("The order got successfully updated.", HttpStatus.OK);
         } else {
             response = new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
         }

@@ -1,13 +1,10 @@
 package no.ntnu.bicycle.controller;
 
-import no.ntnu.bicycle.model.Customer;
 import no.ntnu.bicycle.model.Product;
 import no.ntnu.bicycle.service.CustomerService;
 import no.ntnu.bicycle.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,7 +31,7 @@ public class ProductController {
 
     /**
      * Gets all products
-     * @return list of all products
+     * @return list of all products.
      */
     @GetMapping()
     public List<Product> getAllProducts(@RequestParam(required = false) String customer,
@@ -69,51 +66,43 @@ public class ProductController {
     }
 
 
+    /**
+     * Adds a new product
+     * @param product Product
+     * @return HTTP 201 CREATED id added, else 400 bad request.
+     */
     @PostMapping()
     public ResponseEntity<String> addNewProduct(@RequestBody Product product) {
         ResponseEntity<String> response;
         String errorMessage = productService.addNewProduct(product);
         if (errorMessage == null) {
             response = new ResponseEntity<>("Product " + product.getProductName() +
-                    " added", HttpStatus.CREATED);
+                    " successfully added.", HttpStatus.CREATED);
         } else {
             response = new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
         }
         return response;
-        /*if (product.isValid()){
-            if (existingProduct == null) {
-                if (productService.addNewProduct(product)) {
-                    response = new ResponseEntity<>("Product successfully added",HttpStatus.CREATED);
-                } else {
-                    response = new ResponseEntity<>("Product could not be added", HttpStatus.BAD_REQUEST);
-                }
-            } else {
-                response = new ResponseEntity<>("Product already exist", HttpStatus.BAD_REQUEST);
-            }
-        }else{
-            response = new ResponseEntity<>("Invalid fields for bike in request", HttpStatus.BAD_REQUEST);
-        }
-        return response;*/
     }
 
 
 
     /**
-     * Deletes product
-     * @return HTTP 200 OK if product deleted, HTTP not found if it did not get deleted
+     * Deletes a product with selected id
+     * @return HTTP 200 OK if product deleted, HTTP not found if it did not get deleted.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable Integer id) {
         ResponseEntity<String> response;
         Product product = productService.getProductById(id);
-        if (productService.deletingProduct(product)) {
-            response = new ResponseEntity<>(HttpStatus.OK);
+        String errorMessage = productService.deletingProduct(product);
+        if (errorMessage == null) {
+            response = new ResponseEntity<>("Product with id " + product.getId() +
+                    " successfully deleted.", HttpStatus.OK);
         } else {
-            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            response = new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
         }
         return response;
     }
-
 
 
 }

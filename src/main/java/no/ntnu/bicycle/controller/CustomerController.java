@@ -204,7 +204,7 @@ public class CustomerController {
     /**
      * Deletes a customer
      * @param customerId customer to be deleted
-     * @return
+     * @return HTTP 200 OK if customer deleted, else 400 bad request
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCustomer(@PathVariable("id") int customerId){
