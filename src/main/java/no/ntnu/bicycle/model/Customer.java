@@ -368,27 +368,4 @@ public class Customer {
     public void setActive(boolean active) {
         this.active = active;
     }
-
-    /*@Override
-    public String toString() {
-        return "Customer{" +
-                            "id=" + id +
-                            ", firstName='" + firstName + '\'' +
-                            ", lastName='" + lastName + '\'' +
-                            ", email='" + email + '\'' +
-                            ", dob=" + dob +
-                            ", phone=" + phone +
-                            ", age=" + age +
-                            ", password=" + password +
-                '}';
-    }*/
-
-    /**
-     * Adding an order to all the orders
-     * @param order the order to add
-     */
-
-    //public void addOrder(CustomerOrder order) {
-    //    orders.add(order);
-    //}
 }
