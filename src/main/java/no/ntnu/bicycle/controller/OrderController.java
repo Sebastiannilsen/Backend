@@ -68,7 +68,7 @@ public class OrderController {
         String errorMessage = orderService.addNewOrder(customerOrder);
 
         if (errorMessage == null) {
-            response = new ResponseEntity<>("Order successfully created.", HttpStatus.OK);
+            response = new ResponseEntity<>("Order successfully created. Order-Id is " + customerOrder.getId(), HttpStatus.OK);
         } else {
             response = new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
         }
