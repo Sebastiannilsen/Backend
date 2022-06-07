@@ -9,9 +9,9 @@ all the things needed. This includes general things like handling customers, pro
 - There is still room for improvement, but we now have a backend with different functionalities and a good security.
 
 ---
-## Table of Contents (Optional)
+## Table of Contents
 
-Here is the content of this project: 
+Here is the content overview: 
 
 - [Preparation](#preparation)
 - [Installation and running the project](#installation-and-running-the-project)
