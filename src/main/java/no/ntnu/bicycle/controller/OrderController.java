@@ -106,8 +106,8 @@ public class OrderController {
     public ResponseEntity<String> delete(@PathVariable int id) {
         ResponseEntity<String> response;
         if (orderService.deletingOrder(id)) {
-            response = new ResponseEntity<>("The order" + orderService.findOrderById(id) +
-                    "got successfully deleted.", HttpStatus.OK);
+            response = new ResponseEntity<>("The order with id: " + id +
+                    " , got successfully deleted.", HttpStatus.OK);
         } else {
             response = new ResponseEntity<>("The order cannot be found. " +
                     "Are you sure the input is correct? ", HttpStatus.NOT_FOUND);

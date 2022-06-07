@@ -110,6 +110,6 @@ public class CustomerOrder {
      */
     @JsonIgnore
     public boolean isValid() {
-        return customer.isValid() && !products.isEmpty() && dateAndTime == null && "".equals(email);
+        return customer.isValid() && !products.isEmpty() && dateAndTime != null && !"".equals(email);
     }
 }
