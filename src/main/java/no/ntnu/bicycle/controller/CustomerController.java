@@ -64,7 +64,7 @@ public class CustomerController {
      * @param customerId ID of the customer to be returned
      * @return Customer with the given ID or status 404
      */
-    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public Customer getOneCustomer(@PathParam("costumer")
                                    @PathVariable("id") int customerId) {

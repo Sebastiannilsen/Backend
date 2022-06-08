@@ -83,7 +83,6 @@ public class OrderController {
      * Get a specific order
      * @param id Id of the order to be returned
      * @return Order with the given Id or status 404
-     * !TODO finish this
      */
     @GetMapping("/{id}")
     public ResponseEntity<CustomerOrder> getOne(@PathVariable Integer id) {
@@ -102,6 +101,7 @@ public class OrderController {
      * @param id Id of the order to delete
      * @return 200 OK on success, 404 Not found on error
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable int id) {
         ResponseEntity<String> response;
@@ -121,6 +121,7 @@ public class OrderController {
      * @param customerOrder New order data to store, from request body
      * @return 200 OK success, 400 bad request on error
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<String> update(@PathVariable int id,
                                          @RequestBody CustomerOrder customerOrder) {

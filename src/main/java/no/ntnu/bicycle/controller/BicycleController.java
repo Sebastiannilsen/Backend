@@ -4,6 +4,7 @@ import no.ntnu.bicycle.model.Bicycle;
 import no.ntnu.bicycle.service.BicycleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
@@ -45,7 +46,7 @@ public class BicycleController {
      * @return Bike with the given ID or status 404
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Bicycle> getOneCustomer(@PathParam("bike") @PathVariable("id") int bikeId) {
+    public ResponseEntity<Bicycle> getOneBicycle(@PathParam("bike") @PathVariable("id") int bikeId) {
         Bicycle bicycle = bicycleService.findBicycleById(bikeId);
         if (bicycle != null) {
             return new ResponseEntity<>(bicycle,HttpStatus.OK);
@@ -69,6 +70,7 @@ public class BicycleController {
      * @param bicycle Bicycle
      * @return HTTP 200 OK if bicycle added, 400 if it does not get added
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<String> addBicycle(@RequestBody Bicycle bicycle) {
         ResponseEntity<String> response;
@@ -90,6 +92,7 @@ public class BicycleController {
      * @param bicycle Bicycle
      * @return HTTP 200 OK if deleted, else not found
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<String> updateBicycle(@RequestBody Bicycle bicycle) {
         ResponseEntity<String> response;
@@ -114,6 +117,7 @@ public class BicycleController {
      * @param bikeId int
      * @return HTTP 200 OK updated, 400 if not
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteBicycle(@PathVariable("id") int bikeId) {
         ResponseEntity<String> response;

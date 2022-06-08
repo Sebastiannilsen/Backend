@@ -34,9 +34,24 @@ public class RentalOrderController {
         this.customerService = customerService;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<BicycleRentalOrder>> getAllBicycleRentalOrders(){
         return new ResponseEntity<>(bicycleRentalOrderService.getAll(), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteBicycleRentalOrder(@PathVariable("id") long orderId){
+        ResponseEntity<String> response;
+        String errorMessage = bicycleRentalOrderService.deleteRentalOrder(orderId);
+        if (errorMessage == null) {
+            response = new ResponseEntity<>("Rental " + orderId +
+                    " successfully deleted.", HttpStatus.OK);
+        } else {
+            response = new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+        }
+        return response;
     }
 
 
@@ -45,7 +60,7 @@ public class RentalOrderController {
      * @param http HttpEntity<String>
      * @return 200 OK if bike rental ordered, 400 bad request if not
      */
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @PostMapping(value = "/create", consumes = "application/json")
     public ResponseEntity<String> createBikeRentalOrder(HttpEntity<String> http){
         ResponseEntity<String> response;
@@ -92,7 +107,7 @@ public class RentalOrderController {
      * @param http String
      * @return HTTP 200 OK if order ended and total price, HTTP not found if order is not found
      */
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @PostMapping("/end")
     public ResponseEntity<String> endBicycleOrder(HttpEntity<String> http){
 
@@ -104,7 +119,7 @@ public class RentalOrderController {
 
         if (bicycleRentalOrderService.findBicycleRentalOrderById(id).isPresent()){
             BicycleRentalOrder order = bicycleRentalOrderService.findBicycleRentalOrderById(id).get();
-            if (order.getTotalPrice() == 0 || order.getRentalEndTime() == null) {
+            if (order.getTotalPrice() == 0 && order.getRentalEndTime() == null) {
 
                 int totalPrice = bicycleRentalOrderService.endBicycleRentalOrderAndReturnTotalPrice(order, endLocationLat, endLocationLon);
 

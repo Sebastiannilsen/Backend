@@ -1,6 +1,7 @@
 package no.ntnu.bicycle.service;
 
 import no.ntnu.bicycle.model.BicycleRentalOrder;
+import no.ntnu.bicycle.model.Customer;
 import no.ntnu.bicycle.model.CustomerOrder;
 import no.ntnu.bicycle.repository.BicycleRentalOrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,5 +105,16 @@ public class BicycleRentalOrderService {
         List<BicycleRentalOrder> list = new LinkedList<>();
         iterable.forEach(list::add);
         return list;
+    }
+
+    public String deleteRentalOrder(long orderId) {
+        String errorMessage = null;
+        Optional<BicycleRentalOrder> rentalOrder = bicycleRentalOrderRepository.findById(orderId);
+        if (rentalOrder.isPresent()) {
+            bicycleRentalOrderRepository.delete(rentalOrder.get());
+        } else {
+            errorMessage = "Rental not found in database";
+        }
+        return errorMessage;
     }
 }

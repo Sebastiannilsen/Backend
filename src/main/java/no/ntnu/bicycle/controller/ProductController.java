@@ -5,6 +5,7 @@ import no.ntnu.bicycle.service.CustomerService;
 import no.ntnu.bicycle.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -71,6 +72,7 @@ public class ProductController {
      * @param product Product
      * @return HTTP 201 CREATED id added, else 400 bad request.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping()
     public ResponseEntity<String> addNewProduct(@RequestBody Product product) {
         ResponseEntity<String> response;
@@ -90,6 +92,7 @@ public class ProductController {
      * Deletes a product with selected id
      * @return HTTP 200 OK if product deleted, HTTP not found if it did not get deleted.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable Integer id) {
         ResponseEntity<String> response;
